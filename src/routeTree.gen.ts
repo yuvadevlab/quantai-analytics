@@ -10,33 +10,62 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PredictionsRouteImport } from './routes/predictions'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PredictionsIdRouteImport } from './routes/predictions.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PredictionsRoute = PredictionsRouteImport.update({
+  id: '/predictions',
+  path: '/predictions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PredictionsIdRoute = PredictionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PredictionsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/predictions': typeof PredictionsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/predictions/$id': typeof PredictionsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/predictions': typeof PredictionsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/predictions/$id': typeof PredictionsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/predictions': typeof PredictionsRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/predictions/$id': typeof PredictionsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/predictions' | '/settings' | '/predictions/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/predictions' | '/settings' | '/predictions/$id'
+  id: '__root__' | '/' | '/predictions' | '/settings' | '/predictions/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PredictionsRoute: typeof PredictionsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +77,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/predictions': {
+      id: '/predictions'
+      path: '/predictions'
+      fullPath: '/predictions'
+      preLoaderRoute: typeof PredictionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/predictions/$id': {
+      id: '/predictions/$id'
+      path: '/$id'
+      fullPath: '/predictions/$id'
+      preLoaderRoute: typeof PredictionsIdRouteImport
+      parentRoute: typeof PredictionsRoute
+    }
   }
 }
 
+interface PredictionsRouteChildren {
+  PredictionsIdRoute: typeof PredictionsIdRoute
+}
+
+const PredictionsRouteChildren: PredictionsRouteChildren = {
+  PredictionsIdRoute: PredictionsIdRoute,
+}
+
+const PredictionsRouteWithChildren = PredictionsRoute._addFileChildren(
+  PredictionsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PredictionsRoute: PredictionsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
